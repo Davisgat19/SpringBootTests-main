@@ -1,65 +1,105 @@
 package se.verran.springbootdemowithtests.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import se.verran.springbootdemowithtests.entities.Student;
+import se.verran.springbootdemowithtests.services.StudentService;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 class StudentControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private StudentService studentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private String studentJson;
-    private String expectedStudentJson;
+    @InjectMocks
+    private StudentController studentController;
 
     @BeforeEach
-    public void setup() throws JsonProcessingException {
-        Student studentIn = new Student("Michael", "Granbäck", LocalDate.of(1983, 1, 29), "michael.granback@xlent.se");
-        Student expectedStudentReturnData = new Student("Michael", "Granbäck", LocalDate.of(1983, 1, 29), "michael.granback@xlent.se");
-        expectedStudentReturnData.setId(1);
-        studentJson = objectMapper.writeValueAsString(studentIn);
-        expectedStudentJson = objectMapper.writeValueAsString(expectedStudentReturnData);
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void addStudentShouldReturnStatusOK() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/edu/api/v1/addstudent")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(studentJson)
-                )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json(expectedStudentJson));
+    void testAddStudent() {
+        Student student = new Student("John", "Doe", LocalDate.of(2000, 1, 1), "john.doe@example.com");
+        when(studentService.addStudent(student)).thenReturn(student);
+
+        ResponseEntity<Student> response = studentController.addStudent(student);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(student, response.getBody());
+        verify(studentService, times(1)).addStudent(student);
     }
+
     @Test
-    public void addStudentWithConflictingEmailShouldReturnStatusConflict() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/edu/api/v1/addstudent")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(studentJson)
-                )
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().json(expectedStudentJson));
-        mockMvc.perform(MockMvcRequestBuilders.post("/edu/api/v1/addstudent")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(studentJson)
-                )
-                .andExpect(MockMvcResultMatchers.status().isConflict());
+    void testGetStudentById() {
+        Student student = new Student("John", "Doe", LocalDate.of(2000, 1, 1), "john.doe@example.com");
+        when(studentService.getStudentById(1)).thenReturn(student);
+
+        ResponseEntity<Student> response = studentController.getStudentById(1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(student, response.getBody());
+        verify(studentService, times(1)).getStudentById(1);
+    }
+
+    @Test
+    void testGetAllStudents() {
+        Student student1 = new Student("John", "Doe", LocalDate.of(2000, 1, 1), "john.doe@example.com");
+        Student student2 = new Student("Jane", "Doe", LocalDate.of(2001, 2, 2), "jane.doe@example.com");
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(student1, student2));
+
+        ResponseEntity<List<Student>> response = studentController.getAllStudents();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        assertEquals(student1, response.getBody().get(0));
+        assertEquals(student2, response.getBody().get(1));
+        verify(studentService, times(1)).getAllStudents();
+    }
+
+    @Test
+    void testUpdateStudentById() {
+        Student student = new Student("John", "Doe", LocalDate.of(2000, 1, 1), "john.doe@example.com");
+        when(studentService.updateStudent(student)).thenReturn(student);
+
+        ResponseEntity<Student> response = studentController.updateStudentById(student);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(student, response.getBody());
+        verify(studentService, times(1)).updateStudent(student);
+    }
+
+    @Test
+    void testSetGradeForStudentById() {
+        Student student = new Student("John", "Doe", LocalDate.of(2000, 1, 1), "john.doe@example.com");
+        student.setJavaProgrammingGrade(4.0);
+        when(studentService.setGradeForStudentById(1, "4.0")).thenReturn(student);
+
+        ResponseEntity<Student> response = studentController.setGradeForStudentById(1, "4.0");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(4.0, response.getBody().getJavaProgrammingGrade());
+        verify(studentService, times(1)).setGradeForStudentById(1, "4.0");
+    }
+
+    @Test
+    void testDeleteStudentById() {
+        ResponseEntity<String> response = studentController.deleteStudentById(1);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Student by id 1 deleted", response.getBody());
+        verify(studentService, times(1)).deleteStudent(1);
     }
 }
