@@ -13,6 +13,7 @@ import se.verran.springbootdemowithtests.services.StudentService;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -63,7 +64,7 @@ class StudentControllerTest {
         ResponseEntity<List<Student>> response = studentController.getAllStudents();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
         assertEquals(student1, response.getBody().get(0));
         assertEquals(student2, response.getBody().get(1));
         verify(studentService, times(1)).getAllStudents();
@@ -90,7 +91,7 @@ class StudentControllerTest {
         ResponseEntity<Student> response = studentController.setGradeForStudentById(1, "4.0");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(4.0, response.getBody().getJavaProgrammingGrade());
+        assertEquals(4.0, Objects.requireNonNull(response.getBody()).getJavaProgrammingGrade());
         verify(studentService, times(1)).setGradeForStudentById(1, "4.0");
     }
 

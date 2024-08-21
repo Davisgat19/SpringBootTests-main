@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +62,40 @@ public class SchoolServiceTest {
         String result = schoolService.numberOfStudentsPerGroupWhenDivideIntoNumberOfGroups(2);
         assertThat(result).isEqualTo("Not able to manage 2 groups with 2 students");
     }
+
+
+    @Test
+    void testNumberOfStudentsPerGroupSuccessfulFormation_WithRemainder() {
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(
+                new Student("John", "Doe", LocalDate.of(1998, 1, 1), "john@example.com"),
+                new Student("Jane", "Doe", LocalDate.of(1999, 2, 2), "jane@example.com"),
+                new Student("Davis", "Her", LocalDate.of(2000, 3, 3), "davis@example.com"),
+                new Student("Mic", "Jäger", LocalDate.of(2001, 4, 4), "mic@example.com"),
+                new Student("Joe", "Biddy", LocalDate.of(2002, 5, 5), "joe@example.com")
+        ));
+
+        String result = schoolService.numberOfStudentsPerGroupWhenDivideIntoNumberOfGroups(2);
+
+        assertEquals("2 groups could be formed with 2 students per group, but that would leave 1 student hanging", result);
+    }
+
+
+    @Test
+    void testNumberOfStudentsPerGroupSuccessfulFormation_NoRemainder() {
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(
+                new Student("John", "Doe", LocalDate.of(1998, 1, 1), "john@example.com"),
+                new Student("Jane", "Doe", LocalDate.of(1999, 2, 2), "jane@example.com"),
+                new Student("Davis", "Her", LocalDate.of(2000, 3, 3), "davis@example.com"),
+                new Student("Mic", "Jäger", LocalDate.of(2001, 4, 4), "mic@example.com")
+        ));
+
+        String result = schoolService.numberOfStudentsPerGroupWhenDivideIntoNumberOfGroups(2);
+
+        assertEquals("2 groups could be formed with 2 students per group", result);
+    }
+
+
+
 
     @Test
     void testNumberOfGroupsWhenDividedIntoGroupsOfInvalidSize() {
@@ -118,5 +153,47 @@ public class SchoolServiceTest {
         assertThat(result).containsExactly(student1);
     }
 
+    @Test
+    void testNumberOfStudentsPerGroupSuccessfulFormation() {
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(
+                new Student("John", "Doe", LocalDate.of(1998, 1, 1), "john@example.com"),
+                new Student("Jane", "Doe", LocalDate.of(1999, 2, 2), "jane@example.com"),
+                new Student("Davis", "Her", LocalDate.of(2000, 3, 3), "davis@example.com"),
+                new Student("Mic", "Jäger", LocalDate.of(2001, 4, 4), "mic@example.com")
+        ));
+
+        String result = schoolService.numberOfStudentsPerGroupWhenDivideIntoNumberOfGroups(2);
+
+        assertEquals("2 groups could be formed with 2 students per group", result);
+    }
+
+    @Test
+    void testNumberOfGroupsWhenDividedIntoGroupsOf_SuccessfulFormation() {
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(
+                new Student("John", "Doe", LocalDate.of(1998, 1, 1), "john@example.com"),
+                new Student("Jane", "Doe", LocalDate.of(1999, 2, 2), "jane@example.com"),
+                new Student("Dav", "Her", LocalDate.of(2000, 3, 3), "davis@example.com"),
+                new Student("Mic", "Jäger", LocalDate.of(2001, 4, 4), "mic@example.com")
+        ));
+
+        String result = schoolService.numberOfGroupsWhenDividedIntoGroupsOf(2);
+
+        assertEquals("2 students per group is possible, there will be 2 groups", result);
+    }
+
+    @Test
+    void testNumberOfGroupsWhenDividedIntoGroupsOf_TooSmallGroupSize() {
+        when(studentService.getAllStudents()).thenReturn(Arrays.asList(
+                new Student("John", "Doe", LocalDate.of(1998, 1, 1), "john@example.com"),
+                new Student("Jane", "Doe", LocalDate.of(1999, 2, 2), "jane@example.com")
+        ));
+
+        String result = schoolService.numberOfGroupsWhenDividedIntoGroupsOf(1);
+
+        assertEquals("Size of group should be at least 2", result);
+    }
 
 }
+
+
+
