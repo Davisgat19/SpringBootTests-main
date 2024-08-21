@@ -1,0 +1,7 @@
+se\verran\springbootdemowithtests\entities\Student.class
+se\verran\springbootdemowithtests\services\SchoolService.class
+se\verran\springbootdemowithtests\services\StudentService.class
+se\verran\springbootdemowithtests\repositories\StudentRepository.class
+se\verran\springbootdemowithtests\controllers\StudentController.class
+se\verran\springbootdemowithtests\controllers\SchoolController.class
+se\verran\springbootdemowithtests\SpringBootDemoWithTestsApplication.class
