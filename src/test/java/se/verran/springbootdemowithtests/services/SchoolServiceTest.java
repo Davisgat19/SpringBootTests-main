@@ -117,4 +117,6 @@ public class SchoolServiceTest {
         List<Student> result = schoolService.getTopScoringStudents();
         assertThat(result).containsExactly(student1);
     }
+
+
 }
